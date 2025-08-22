@@ -1,8 +1,13 @@
 #include <WiFi.h>
 #include "wifi_init.h"
 
-#define WIFI_SSID "Ukikaze"
-#define WIFI_PASS "woaini7758258"
+#ifndef WIFI_SSID
+#define WIFI_SSID "WIFI_SSID"
+#endif
+
+#ifndef WIFI_PASS
+#define WIFI_PASS "WIFI_PASS"
+#endif
 
 void WiFiEvent(WiFiEvent_t event)
 {
@@ -28,4 +33,11 @@ void wifi_init_sta()
     WiFi.onEvent(WiFiEvent);
     WiFi.mode(WIFI_STA);
     WiFi.begin(WIFI_SSID, WIFI_PASS);
+
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println("Connected to Wi-Fi");
 }

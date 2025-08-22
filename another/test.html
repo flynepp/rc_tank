@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>ESP32-CAM WebSocket Client</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 2rem;
+    }
+
+    #log {
+      border: 1px solid #ccc;
+      padding: 1rem;
+      height: 300px;
+      overflow-y: auto;
+    }
+
+    input {
+      padding: 0.5rem;
+      width: 300px;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>ESP32-CAM WebSocket Client</h2>
+
+  <div id="log"></div>
+
+  <input type="text" id="msgInput" placeholder="Type message...">
+  <button id="sendBtn">Send</button>
+
+  <script>
+    const wsUrl = "ws://192.168.1.132:81/"; // 替换为你的 ESP32-CAM IP 和端口
+    const ws = new WebSocket(wsUrl);
+
+    const log = document.getElementById("log");
+    const input = document.getElementById("msgInput");
+    const btn = document.getElementById("sendBtn");
+
+    function addLog(message) {
+      const p = document.createElement("p");
+      p.textContent = message;
+      log.appendChild(p);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    ws.onopen = () => addLog("Connected to WebSocket server");
+    ws.onmessage = (event) => addLog("Server: " + event.data);
+    ws.onclose = () => addLog("Disconnected from server");
+    ws.onerror = (err) => addLog("Error: " + err);
+
+    btn.onclick = () => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(input.value);
+        addLog("You: " + input.value);
+        input.value = "";
+      } else {
+        addLog("WebSocket is not connected.");
+      }
+    };
+
+    // 按 Enter 也能发送
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") btn.click();
+    });
+  </script>
+</body>
+
+</html>

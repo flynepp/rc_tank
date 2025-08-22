@@ -54,6 +54,8 @@ void ws_server_init()
 {
     webSocket.begin();
     webSocket.onEvent(webSocketEvent);
+
+    Serial.println("WebSocket server started on port 81.");
 }
 
 // 外部循环函数
