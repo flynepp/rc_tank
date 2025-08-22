@@ -1,10 +1,12 @@
 #ifndef WS_SERVER_H
 #define WS_SERVER_H
 
-#include <ESPAsyncWebServer.h>
+#include <WebSocketsServer.h>
 
-// 声明 WebSocket 对象和初始化函数
-extern AsyncWebSocket ws;
-void ws_init(AsyncWebServer &server);
+// 初始化 WebSocket
+void ws_server_init();
+
+// WebSocket 循环调用（在 loop 或 app_main 里执行）
+void ws_server_loop();
 
 #endif // WS_SERVER_H

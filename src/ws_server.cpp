@@ -1,49 +1,63 @@
+#include "ws_server.h"
 #include <WiFi.h>
-#include <ESPAsyncWebServer.h>
 
-#define WIFI_SSID "Ukikaze"
-#define WIFI_PASS "woaini7758258"
+#define USE_SERIAL Serial // ESP32-CAM 直接用 Serial
 
-AsyncWebServer server(80);
-AsyncWebSocket ws("/ws");
+// WebSocket 实例
+WebSocketsServer webSocket = WebSocketsServer(81);
 
-void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
-               void *arg, uint8_t *data, size_t len)
+// 内部工具函数，不需要在 .h 中声明
+static void hexdump(const void *mem, uint32_t len, uint8_t cols = 16)
 {
-    if (type == WS_EVT_CONNECT)
+    const uint8_t *src = (const uint8_t *)mem;
+    USE_SERIAL.printf("\n[HEXDUMP] Address: 0x%08X len: 0x%X (%d)", (ptrdiff_t)src, len, len);
+    for (uint32_t i = 0; i < len; i++)
     {
-        Serial.printf("Client connected: %u\n", client->id());
+        if (i % cols == 0)
+            USE_SERIAL.printf("\n[0x%08X] 0x%08X: ", (ptrdiff_t)src, i);
+        USE_SERIAL.printf("%02X ", *src);
+        src++;
     }
-    else if (type == WS_EVT_DISCONNECT)
+    USE_SERIAL.printf("\n");
+}
+
+// WebSocket 回调
+static void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
+{
+    switch (type)
     {
-        Serial.printf("Client disconnected: %u\n", client->id());
+    case WStype_DISCONNECTED:
+        USE_SERIAL.printf("[%u] Disconnected!\n", num);
+        break;
+    case WStype_CONNECTED:
+    {
+        IPAddress ip = webSocket.remoteIP(num);
+        USE_SERIAL.printf("[%u] Connected from %d.%d.%d.%d url: %s\n",
+                          num, ip[0], ip[1], ip[2], ip[3], payload);
+        webSocket.sendTXT(num, "Connected");
     }
-    else if (type == WS_EVT_DATA)
-    {
-        Serial.printf("Received: %.*s\n", len, data);
-        // Echo back
-        client->text((char *)data);
+    break;
+    case WStype_TEXT:
+        USE_SERIAL.printf("[%u] get Text: %s\n", num, payload);
+        break;
+    case WStype_BIN:
+        USE_SERIAL.printf("[%u] get binary length: %u\n", num, length);
+        hexdump(payload, length);
+        break;
+    default:
+        break;
     }
 }
 
-void setup()
+// 外部调用初始化函数
+void ws_server_init()
 {
-    Serial.begin(115200);
-    WiFi.begin(WIFI_SSID, WIFI_PASS);
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        delay(500);
-        Serial.print(".");
-    }
-    Serial.println();
-    Serial.println("WiFi connected");
-
-    ws.onEvent(onWsEvent);
-    server.addHandler(&ws);
-    server.begin();
+    webSocket.begin();
+    webSocket.onEvent(webSocketEvent);
 }
 
-void loop()
+// 外部循环函数
+void ws_server_loop()
 {
-    ws.cleanupClients(); // 必须调用以清理断开的客户端
+    webSocket.loop();
 }
