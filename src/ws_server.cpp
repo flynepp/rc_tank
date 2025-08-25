@@ -4,9 +4,9 @@
 #define USE_SERIAL Serial // ESP32-CAM 直接用 Serial
 
 // WebSocket 实例
+WebSocketsServer *g_ws = nullptr;
 WebSocketsServer webSocket = WebSocketsServer(81);
 
-// 内部工具函数，不需要在 .h 中声明
 static void hexdump(const void *mem, uint32_t len, uint8_t cols = 16)
 {
     const uint8_t *src = (const uint8_t *)mem;
@@ -52,14 +52,26 @@ static void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t 
 // 外部调用初始化函数
 void ws_server_init()
 {
-    webSocket.begin();
-    webSocket.onEvent(webSocketEvent);
-
-    Serial.println("WebSocket server started on port 81.");
+    if (WiFi.status() == WL_CONNECTED)
+    {
+        g_ws = &webSocket;
+        webSocket.begin();
+        webSocket.onEvent(webSocketEvent);
+        Serial.println("WebSocket server started on port 81.");
+    }
+    else
+    {
+        Serial.println("Wi-Fi not connected yet, cannot start WebSocket server.");
+    }
 }
 
 // 外部循环函数
 void ws_server_loop()
 {
     webSocket.loop();
+}
+
+void ws_server_send(const String &msg)
+{
+    webSocket.broadcastTXT(msg.c_str());
 }

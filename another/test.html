@@ -37,8 +37,9 @@
   <button id="sendBtn">Send</button>
 
   <script>
-    const wsUrl = "ws://192.168.1.132:81/"; // 替换为你的 ESP32-CAM IP 和端口
-    const ws = new WebSocket(wsUrl);
+    const wsUrl = "ws://192.168.1.132:81/";
+    let ws;
+    let reconnectInterval = 500;
 
     const log = document.getElementById("log");
     const input = document.getElementById("msgInput");
@@ -51,13 +52,26 @@
       log.scrollTop = log.scrollHeight;
     }
 
-    ws.onopen = () => addLog("Connected to WebSocket server");
-    ws.onmessage = (event) => addLog("Server: " + event.data);
-    ws.onclose = () => addLog("Disconnected from server");
-    ws.onerror = (err) => addLog("Error: " + err);
+    function connectWebSocket() {
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => addLog("Connected to WebSocket server");
+      ws.onmessage = (event) => addLog("Server: " + event.data);
+      ws.onclose = () => {
+        addLog("Disconnected from server, retrying...");
+        setTimeout(connectWebSocket, reconnectInterval);
+      };
+      ws.onerror = (err) => {
+        console.log(err);
+        addLog("Error: " + err + ", retrying...");
+        ws.close();
+      };
+    }
+
+    connectWebSocket();
 
     btn.onclick = () => {
-      if (ws.readyState === WebSocket.OPEN) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(input.value);
         addLog("You: " + input.value);
         input.value = "";
