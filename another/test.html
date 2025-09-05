@@ -2,89 +2,40 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <title>ESP32-CAM WebSocket Client</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 2rem;
-    }
-
-    #log {
-      border: 1px solid #ccc;
-      padding: 1rem;
-      height: 300px;
-      overflow-y: auto;
-    }
-
-    input {
-      padding: 0.5rem;
-      width: 300px;
-    }
-
-    button {
-      padding: 0.5rem 1rem;
-    }
-  </style>
+	<meta charset="UTF-8">
+	<title>ESP32 Remote-Tank</title>
+	<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <h2>ESP32-CAM WebSocket Client</h2>
+	<div class="container">
+		<div class="video">
+			<div class="main-container">
+				<div class="left-display" id="left-display"></div>
+				<h2 class="title">ESP32 Remote-Tank</h2>
+				<div class="right-display">
+					<div>
+						<p>CPU: <span>50%</span></p>
+						<p>MEM: <span>12%</span></p>
+						<p>BAT: <span>80%</span></p>
+					</div>
+				</div>
+			</div>
 
-  <div id="log"></div>
-
-  <input type="text" id="msgInput" placeholder="Type message...">
-  <button id="sendBtn">Send</button>
-
-  <script>
-    const wsUrl = "ws://192.168.1.132:81/";
-    let ws;
-    let reconnectInterval = 500;
-
-    const log = document.getElementById("log");
-    const input = document.getElementById("msgInput");
-    const btn = document.getElementById("sendBtn");
-
-    function addLog(message) {
-      const p = document.createElement("p");
-      p.textContent = message;
-      log.appendChild(p);
-      log.scrollTop = log.scrollHeight;
-    }
-
-    function connectWebSocket() {
-      ws = new WebSocket(wsUrl);
-
-      ws.onopen = () => addLog("Connected to WebSocket server");
-      ws.onmessage = (event) => addLog("Server: " + event.data);
-      ws.onclose = () => {
-        addLog("Disconnected from server, retrying...");
-        setTimeout(connectWebSocket, reconnectInterval);
-      };
-      ws.onerror = (err) => {
-        console.log(err);
-        addLog("Error: " + err + ", retrying...");
-        ws.close();
-      };
-    }
-
-    connectWebSocket();
-
-    btn.onclick = () => {
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(input.value);
-        addLog("You: " + input.value);
-        input.value = "";
-      } else {
-        addLog("WebSocket is not connected.");
-      }
-    };
-
-    // 按 Enter 也能发送
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") btn.click();
-    });
-  </script>
+			<div class="background-video">
+			</div>
+		</div>
+		<div class="joystick">
+			<div id="left-joystick"></div>
+			<div id="right-joystick"></div>
+		</div>
+	</div>
 </body>
+<script src="
+https://cdn.jsdelivr.net/npm/nipplejs@0.10.2/dist/nipplejs.min.js
+"></script>
+<script src="display.js"></script>
+<script src="joystick.js"></script>
 
 </html>

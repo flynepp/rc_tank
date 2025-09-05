@@ -1,0 +1,91 @@
+body {
+    display: flex;
+    justify-content: center;
+    font-family: 'VT323', monospace;
+}
+
+.container {
+    background-color: rgb(61, 61, 61);
+    height: 97vh;
+    width: 98vw;
+    position: relative;
+}
+
+.main-container {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+}
+
+.title {
+    font-size: xx-large;
+    color: rgba(100, 100, 255, 60%)
+}
+
+.main-container> :first-child,
+.main-container> :last-child {
+    margin: 1%;
+    width: 30%;
+    height: 50%;
+}
+
+.left-display {
+    color: #0f0;
+    font-family: monospace;
+    padding: 5px;
+    box-sizing: border-box;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.left-display>div {
+    display: inline-block;
+    background: rgba(50, 50, 50, 0.2);
+    padding: 0 8px;
+    align-self: flex-start;
+}
+
+.right-display {
+    font-size: larger;
+    color: #d0ff00;
+    text-shadow:
+        0 0 5px #ff00ff,
+        0 0 10px #ff00ff,
+        0 0 20px #00ffff,
+        0 0 40px #00ffff;
+    display: flex;
+    flex-direction: row-reverse;
+    ;
+}
+
+@media (orientation: landscape) {
+    .video {
+        top: 0;
+        left: 0;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+@media (orientation: portrait) {
+    .video {
+        width: 100%;
+        height: auto;
+    }
+}
+
+.joystick {
+    position: relative;
+    bottom: 30%;
+    height: 20%;
+    display: flex;
+    justify-content: space-around;
+}
+
+.joystick>div {
+    height: 100%;
+    aspect-ratio: 1 / 1;
+    position: relative;
+}
