@@ -66,6 +66,8 @@ void loop()
 
         controlData = control();
 
+        Serial.printf("x: %.2f, y: %.2f, z: %.2f\n", controlData[0], controlData[1], controlData[2]);
+
         last_control = now;
     }
 }

@@ -47,7 +47,7 @@ RigthJoystick.on('end', function () {
 });
 
 setInterval(() => {
-    if ((currentX != 0 || currentY != 0 || currentZ != 0) && ws) {
+    if (ws) {
         ws.send(`["${currentX.toFixed(2)}, ${currentY.toFixed(2)}", "${currentZ.toFixed(2)}"]`);
     }
 }, 50);
@@ -55,12 +55,14 @@ setInterval(() => {
 //////////////////////////////////////////////////////////////////
 
 function setCurrent(x, y) {
+    // 输入归一化，保证 x^2 + y^2 <= 1
     let len = Math.sqrt(x * x + y * y);
-    if (len > 0) {
-        x = x / len;
-        y = y / len;
+    if (len > 1) {
+        x /= len;
+        y /= len;
     }
 
+    // 阈值死区
     currentX = Math.abs(x) > 0.2 ? x : 0;
     currentY = Math.abs(y) > 0.2 ? y : 0;
 }

@@ -42,13 +42,18 @@ static void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t 
     }
     break;
     case WStype_TEXT:
-        strncpy(lastMsg, (char *)payload, length);
-        lastMsg[length] = '\0';
-        break;
+    {
+        size_t copy_len = (length < sizeof(lastMsg) - 1) ? length : sizeof(lastMsg) - 1;
+        memcpy(lastMsg, payload, copy_len);
+        lastMsg[copy_len] = '\0';
+    }
+    break;
     case WStype_BIN:
+    {
         USE_SERIAL.printf("[%u] get binary length: %u\n", num, length);
         hexdump(payload, length);
-        break;
+    }
+    break;
     default:
         break;
     }

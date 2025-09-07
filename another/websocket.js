@@ -36,6 +36,10 @@ function imgShow(data) {
         img.style.transformOrigin = 'center center';
     };
     img.src = url;
+
+    const timestampMs = Date.now();
+    fpsArr.push(timestampMs);
+    if (fpsArr.length > 10) fpsArr.shift();
 }
 
 function messageShow(data) {

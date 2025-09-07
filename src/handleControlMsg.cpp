@@ -17,8 +17,30 @@ const int resolution = 16;
 int deg = 90;
 float rotateDeg = 30.0;
 
+pair<float, float> transfer(float x, float y)
+{
+    // 差速映射
+    float u = y + x;
+    float v = y - x;
+
+    // 限制输出在单位圆内
+    float len = sqrt(u * u + v * v);
+    if (len > 1.0f)
+    {
+        u /= len;
+        v /= len;
+    }
+
+    return make_pair(u, v);
+}
 vector<float> control()
 {
+    if (lastMsg[0] == '\0')
+    {
+        vector<float> result = {0.0, 0.0, 0.0};
+        return result;
+    }
+
     // ["0.00, 0.00", "-0.72"]
     JsonDocument controlMsg;
 
@@ -38,17 +60,6 @@ vector<float> control()
     return result;
 }
 
-pair<float, float> transfer(float x, float y)
-{
-    float x1 = 1.0f / sqrt(2.0f) * (x + y);
-    float y1 = 1.0f / sqrt(2.0f) * (-1.0f * x + y);
-
-    float u = y1;
-    float v = x1;
-
-    return make_pair(u, v);
-}
-
 void initMotor()
 {
     ledcSetup(0, freq, resolution);
@@ -58,6 +69,13 @@ void initMotor()
     ledcAttachPin(SG90_PIN, 0);
     ledcAttachPin(FS90R1_PIN, 1);
     ledcAttachPin(FS90R2_PIN, 2);
+}
+
+int pulseWidthToDuty(int pulse_us)
+{
+    // duty = pulse / period * 2^resolution
+    // period = 1/freq = 20ms = 20000us
+    return (pulse_us * (1 << resolution)) / 20000;
 }
 
 void fs90r(string which, float speed)
@@ -95,11 +113,4 @@ void sg90(float speed)
     int PWM = 500 + 2000 / 180 * destination;
 
     ledcWrite(channel, pulseWidthToDuty(PWM));
-}
-
-int pulseWidthToDuty(int pulse_us)
-{
-    // duty = pulse / period * 2^resolution
-    // period = 1/freq = 20ms = 20000us
-    return (pulse_us * (1 << resolution)) / 20000;
 }

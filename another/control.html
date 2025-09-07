@@ -17,6 +17,7 @@
 				<div>
 					<p>CPU: <span id="cpu">disconnect</span></p>
 					<p>MEM: <span id="mem">disconnect</span></p>
+					<p>FPS: <span id="fps">disconnect</span></p>
 					<p>BAT: <span id="bat">disconnect</span></p>
 				</div>
 			</div>
@@ -47,12 +48,15 @@
 
 	const cpuInfo = document.getElementById("cpu");
 	const memInfo = document.getElementById("mem");
+	const fpsInfo = document.getElementById("fps");
 	const batInfo = document.getElementById("bat");
 
 	let status = false;
 	const rotation = 0;
 	let ws = null;
 	let img = null;
+	let fpsArr = new Array;
+	let fpsCal = null;
 
 	toggleButton.addEventListener("click", () => {
 		status = !status;
@@ -68,6 +72,17 @@
 		elementInit();
 
 		ws = createWebSocket("192.168.2.132", "81");
+
+		fpsCal = setInterval(() => {
+			if (fpsArr.length > 3) {
+				const ms = fpsArr[fpsArr.length - 1] - fpsArr[0];
+
+				const fps = (fpsArr.length / ms) * 1000;
+
+				fpsInfo.innerText = `${fps.toFixed(2)}`;
+				fpsArr.shift();
+			}
+		}, 500);
 	}
 
 	function elementInit() {
@@ -93,10 +108,14 @@
 
 		cpuInfo.innerText = "disconnet";
 		batInfo.innerText = "disconnet";
+		fpsInfo.innerText = "disconnet";
 		memInfo.innerText = "disconnet";
 	}
 
 	function close() {
+		clearInterval(fpsCal);
+		fpsCal = null;
+
 		elementBack();
 
 		ws.close();
