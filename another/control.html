@@ -15,9 +15,9 @@
 			<h2 class="title">ESP32 Remote-Tank</h2>
 			<div class="right-display">
 				<div>
-					<p>CPU: <span>50%</span></p>
-					<p>MEM: <span>12%</span></p>
-					<p>BAT: <span>80%</span></p>
+					<p>CPU: <span id="cpu">disconnect</span></p>
+					<p>MEM: <span id="mem">disconnect</span></p>
+					<p>BAT: <span id="bat">disconnect</span></p>
 				</div>
 			</div>
 		</div>
@@ -37,8 +37,71 @@
 </body>
 
 <script src=" https://cdn.jsdelivr.net/npm/nipplejs@0.10.2/dist/nipplejs.min.js "></script>
-<script src=" display.js"></script>
+<script src="display.js"></script>
 <script src="joystick.js"></script>
 <script src="websocket.js"></script>
+<script>
+	const toggleButton = document.getElementById("button");
+	const cameraOff = document.getElementById("camera-off");
+	const videoContainer = document.getElementById("video");
+
+	const cpuInfo = document.getElementById("cpu");
+	const memInfo = document.getElementById("mem");
+	const batInfo = document.getElementById("bat");
+
+	let status = false;
+	const rotation = 0;
+	let ws = null;
+	let img = null;
+
+	toggleButton.addEventListener("click", () => {
+		status = !status;
+
+		if (status) {
+			open();
+		} else {
+			close();
+		}
+	});
+
+	function open() {
+		elementInit();
+
+		ws = createWebSocket("192.168.2.132", "81");
+	}
+
+	function elementInit() {
+		toggleButton.innerText = "finish";
+
+		cameraOff.style.zIndex = "-100";
+
+		img = document.createElement("img");
+		img.src = "";
+		img.style.zIndex = "-1";
+
+		videoContainer.appendChild(img);
+	}
+
+	function elementBack() {
+		img = null;
+
+		toggleButton.innerText = "start";
+
+		videoContainer.firstChild.remove();
+
+		cameraOff.style.zIndex = "-1";
+
+		cpuInfo.innerText = "disconnet";
+		batInfo.innerText = "disconnet";
+		memInfo.innerText = "disconnet";
+	}
+
+	function close() {
+		elementBack();
+
+		ws.close();
+		ws = null;
+	}
+</script>
 
 </html>

@@ -47,8 +47,8 @@ RigthJoystick.on('end', function () {
 });
 
 setInterval(() => {
-    if (currentX != 0 || currentY != 0 || currentZ != 0) {
-        producer(`["${currentX.toFixed(2)}, ${currentY.toFixed(2)}", "${currentZ.toFixed(2)}"]`);
+    if ((currentX != 0 || currentY != 0 || currentZ != 0) && ws) {
+        ws.send(`["${currentX.toFixed(2)}, ${currentY.toFixed(2)}", "${currentZ.toFixed(2)}"]`);
     }
 }, 50);
 

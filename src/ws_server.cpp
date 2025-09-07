@@ -30,7 +30,6 @@ static void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t 
     {
     case WStype_DISCONNECTED:
         USE_SERIAL.printf("[%u] Disconnected!\n", num);
-        digitalWrite(16, LOW);
         Connected--;
         break;
     case WStype_CONNECTED:
@@ -39,12 +38,10 @@ static void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t 
         USE_SERIAL.printf("[%u] Connected from %d.%d.%d.%d url: %s\n",
                           num, ip[0], ip[1], ip[2], ip[3], payload);
         webSocket.sendTXT(num, "Connected");
-        digitalWrite(16, HIGH);
         Connected++;
     }
     break;
     case WStype_TEXT:
-        USE_SERIAL.printf("[%u] get Text: %s\n", num, payload);
         strncpy(lastMsg, (char *)payload, length);
         lastMsg[length] = '\0';
         break;

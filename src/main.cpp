@@ -1,19 +1,22 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <vector>
 
 #include "wifi_init.h"
 #include "ws_server.h"
 #include "OTA_setup.h"
 #include "ov2640.h"
-#include "http_server.h"
 #include "usage.h"
+#include "handleControlMsg.h"
+
+using namespace std;
 
 camera_fb_t *fb = nullptr;
 unsigned long last_camera = 0;
 const unsigned long CAMERA_INTERVAL = 100;
 
-unsigned long last_toggle = 0;
-const unsigned long LIGHT_INTERVAL = 1000;
+unsigned long last_control = 0;
+const unsigned long CONTROL_INTERVAL = 20;
 
 void setup()
 {
@@ -55,5 +58,14 @@ void loop()
         ws_server_send(usage);
 
         last_camera = now;
+    }
+
+    if (now - last_control >= CONTROL_INTERVAL && Connected)
+    {
+        vector<float> controlData;
+
+        controlData = control();
+
+        last_control = now;
     }
 }
