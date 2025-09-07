@@ -64,6 +64,5 @@ function getRandomInfo() {
 }
 
 consumer();
-setInterval(() => {
-    producer("Info: " + getRandomInfo());
-}, 1000);
+
+

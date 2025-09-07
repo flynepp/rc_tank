@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>ESP32 Remote-Tank</title>
+	<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+	<div class="container">
+		<div class="main-container">
+			<div class="left-display" id="left-display"></div>
+			<h2 class="title">ESP32 Remote-Tank</h2>
+			<div class="right-display">
+				<div>
+					<p>CPU: <span>50%</span></p>
+					<p>MEM: <span>12%</span></p>
+					<p>BAT: <span>80%</span></p>
+				</div>
+			</div>
+		</div>
+		<div class="joystick">
+			<div id="left-joystick"></div>
+			<div class="button-container">
+				<button id="button">start</button>
+			</div>
+			<div id="right-joystick"></div>
+		</div>
+	</div>
+
+	<div id="camera-off">
+		<h1>SYSTEM OFF</h1>
+	</div>
+	<div id="video"></div>
+</body>
+
+<script src=" https://cdn.jsdelivr.net/npm/nipplejs@0.10.2/dist/nipplejs.min.js "></script>
+<script src=" display.js"></script>
+<script src="joystick.js"></script>
+<script src="websocket.js"></script>
+
+</html>

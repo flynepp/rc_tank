@@ -6,6 +6,8 @@
 // WebSocket 实例
 WebSocketsServer *g_ws = nullptr;
 WebSocketsServer webSocket = WebSocketsServer(81);
+int Connected = 0;
+char lastMsg[256];
 
 static void hexdump(const void *mem, uint32_t len, uint8_t cols = 16)
 {
@@ -28,6 +30,8 @@ static void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t 
     {
     case WStype_DISCONNECTED:
         USE_SERIAL.printf("[%u] Disconnected!\n", num);
+        digitalWrite(16, LOW);
+        Connected--;
         break;
     case WStype_CONNECTED:
     {
@@ -35,10 +39,14 @@ static void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t 
         USE_SERIAL.printf("[%u] Connected from %d.%d.%d.%d url: %s\n",
                           num, ip[0], ip[1], ip[2], ip[3], payload);
         webSocket.sendTXT(num, "Connected");
+        digitalWrite(16, HIGH);
+        Connected++;
     }
     break;
     case WStype_TEXT:
         USE_SERIAL.printf("[%u] get Text: %s\n", num, payload);
+        strncpy(lastMsg, (char *)payload, length);
+        lastMsg[length] = '\0';
         break;
     case WStype_BIN:
         USE_SERIAL.printf("[%u] get binary length: %u\n", num, length);
@@ -74,4 +82,9 @@ void ws_server_loop()
 void ws_server_send(const String &msg)
 {
     webSocket.broadcastTXT(msg.c_str());
+}
+
+void ws_server_send_image(uint8_t *buf, size_t len)
+{
+    webSocket.broadcastBIN(buf, len);
 }
