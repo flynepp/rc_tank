@@ -17,7 +17,9 @@ float getMemoryUsage()
 
 float getBattery()
 {
-    return get_voltage();
+    float current_voltage = get_voltage();
+
+    return current_voltage;
 }
 
 const char *getUsage(unsigned long taskElapsed, unsigned long totalElapsed)

@@ -4,6 +4,7 @@
 #include <WebSocketsServer.h>
 
 extern WebSocketsServer *g_ws;
+extern WebSocketsServer webSocket;
 extern int Connected;
 extern char lastMsg[256];
 

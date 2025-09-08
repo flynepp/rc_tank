@@ -13,7 +13,11 @@ function createWebSocket(ip, port) {
     ws.onclose = () => {
         producer(`WebSocket closed: ${ip}:${port}`);
     };
-    ws.onerror = (err) => producer(`WebSocket error: ${ip}:${port}`);
+
+    ws.onerror = (err) => {
+        producer(`WebSocket error: ${ip}:${port}`);
+        close();
+    };
 
     return ws;
 }

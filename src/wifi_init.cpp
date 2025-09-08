@@ -1,5 +1,6 @@
 #include <WiFi.h>
 #include "wifi_init.h"
+#include "esp_system.h"
 
 #ifndef WIFI_SSID
 #define WIFI_SSID "WIFI_SSID"
@@ -34,10 +35,19 @@ void wifi_init_sta()
     WiFi.mode(WIFI_STA);
     WiFi.begin(WIFI_SSID, WIFI_PASS);
 
+    float time_pass = 0.0;
+
     while (WiFi.status() != WL_CONNECTED)
     {
         delay(500);
         Serial.print(".");
+
+        time_pass += 0.5;
+        if (time_pass >= 10)
+        {
+            Serial.println("reboot mcu");
+            esp_restart();
+        }
     }
     Serial.println("Connected to Wi-Fi");
 }

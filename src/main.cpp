@@ -24,7 +24,7 @@ void setup()
 {
     Serial.begin(115200);
 
-    Wire.begin(16, 0);
+    Wire.begin(16, 13);
 
     init_camera();
 
@@ -41,6 +41,15 @@ void setup()
 
 void loop()
 {
+    if (rebootFlag)
+    {
+        Serial.println("System reboot by front");
+
+        webSocket.disconnect();
+        delay(50);
+        esp_restart();
+    }
+
     ws_server_loop();
     ArduinoOTA.handle();
 

@@ -70,25 +70,55 @@
 		}
 	});
 
-	rebootButton.addEventListener("click", () => {
-		status = false;
+	function sendReboot(ws, retries = 50, interval = 10) {
+		let count = 0;
+		let confirmed = false;
 
-		if (ws) {
+		const handler = (event) => {
+			let info;
+			try { info = JSON.parse(event.data); } catch (e) { info = event.data; }
+
+			if (info === "confirm") {
+				confirmed = true;
+				ws.removeEventListener('message', handler);
+			}
+		};
+
+		ws.addEventListener('message', handler);
+
+		const sendLoop = () => {
+			if (confirmed) return;
+			if (count >= retries) {
+				ws.removeEventListener('message', handler);
+				return;
+			}
+
 			ws.send('["reboot"]');
-		}
+			count++;
+			setTimeout(sendLoop, interval);
+		};
 
-		close();
+		sendLoop();
+	}
+
+	rebootButton.addEventListener("click", async () => {
+		if (!ws || ws.readyState !== WebSocket.OPEN) return;
+
+		status = false;
 
 		rebootButton.disabled = true;
 		toggleButton.disabled = true;
 		producer("System reboot... Finished in 5 seconds.");
 
-		setTimeout(() => {
-			rebootButton.disabled = false;
-			toggleButton.disabled = false;
+		sendReboot(ws);
 
-			producer("System reboot finished");
-		}, 5000);
+		close();
+
+		await wait(5000);
+
+		rebootButton.disabled = false;
+		toggleButton.disabled = false;
+		producer("System reboot finished");
 	});
 
 	function open() {
@@ -143,6 +173,10 @@
 
 		ws.close();
 		ws = null;
+	}
+
+	function wait(ms) {
+		return new Promise(resolve => setTimeout(resolve, ms));
 	}
 </script>
 

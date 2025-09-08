@@ -7,17 +7,19 @@ void ina219_setup()
     if (!ina219.begin())
     {
         Serial.println("Failed to find INA219 chip");
-        while (1)
-        {
-            delay(10);
-        }
+    }
+    else
+    {
+        Serial.println("Find INA219 chip");
     }
 }
 
 float get_voltage()
 {
-
+    float shuntvoltage = ina219.getShuntVoltage_mV();
     float busvoltage = ina219.getBusVoltage_V();
 
-    return busvoltage;
+    float loadvoltage = busvoltage + (shuntvoltage / 1000);
+
+    return loadvoltage;
 }

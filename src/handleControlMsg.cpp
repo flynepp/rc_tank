@@ -18,6 +18,8 @@ const int resolution = 16;
 int deg = 90;
 float rotateDeg = 30.0;
 
+bool rebootFlag = false;
+
 pair<float, float> transfer(float x, float y)
 {
     // 差速映射
@@ -34,11 +36,13 @@ pair<float, float> transfer(float x, float y)
 
     return make_pair(u, v);
 }
+
 vector<float> control()
 {
+    vector<float> result = {0.0, 0.0, 0.0};
+
     if (lastMsg[0] == '\0')
     {
-        vector<float> result = {0.0, 0.0, 0.0};
         return result;
     }
 
@@ -50,7 +54,11 @@ vector<float> control()
 
     if (controlMsg[0].as<String>() == "reboot")
     {
-        esp_restart();
+        rebootFlag = true;
+
+        ws_server_send("\"confirm\"");
+
+        return result;
     }
 
     const char *vecStr = controlMsg[0];
@@ -62,7 +70,7 @@ vector<float> control()
 
     auto p = transfer(x, y);
 
-    vector<float> result = {p.first, p.second, z};
+    result = {p.first, p.second, z};
 
     return result;
 }
