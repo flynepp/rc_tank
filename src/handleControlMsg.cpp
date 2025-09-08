@@ -1,6 +1,7 @@
 #include "ws_server.h"
 #include <ArduinoJson.h>
 #include <Arduino.h>
+#include "esp_system.h"
 
 #include <utility>
 #include <cmath>
@@ -42,9 +43,15 @@ vector<float> control()
     }
 
     // ["0.00, 0.00", "-0.72"]
+    // ["reboot"]
     JsonDocument controlMsg;
 
     deserializeJson(controlMsg, lastMsg);
+
+    if (controlMsg[0].as<String>() == "reboot")
+    {
+        esp_restart();
+    }
 
     const char *vecStr = controlMsg[0];
     const char *turretStr = controlMsg[1];

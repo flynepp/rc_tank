@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <vector>
+#include <Wire.h>
 
 #include "wifi_init.h"
 #include "ws_server.h"
@@ -8,6 +9,7 @@
 #include "ov2640.h"
 #include "usage.h"
 #include "handleControlMsg.h"
+#include "INA219.h"
 
 using namespace std;
 
@@ -22,6 +24,8 @@ void setup()
 {
     Serial.begin(115200);
 
+    Wire.begin(16, 0);
+
     init_camera();
 
     wifi_init_sta();
@@ -29,6 +33,8 @@ void setup()
     OTA_setup();
 
     ws_server_init();
+
+    ina219_setup();
 
     Serial.println("Setup finished.");
 }
