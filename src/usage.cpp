@@ -28,7 +28,8 @@ const char *getUsage(unsigned long taskElapsed, unsigned long totalElapsed)
 
     float cpu = getCpuUsage(taskElapsed, totalElapsed);
     float mem = getMemoryUsage();
-    float bat = getBattery();
+    // float bat = getBattery();
+    float bat = 0.0;
 
     snprintf(buffer, sizeof(buffer), "{\"cpu\":%.1f,\"mem\":%.1f,\"bat\":%.1f}", cpu, mem, bat);
 

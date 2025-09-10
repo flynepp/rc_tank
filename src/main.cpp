@@ -11,6 +11,12 @@
 #include "handleControlMsg.h"
 #include "INA219.h"
 
+#include "freertos/FreeRTOS.h"
+#include <freertos/semphr.h>
+#include "freertos/task.h"
+#include "freertos/queue.h"
+#include "esp_system.h"
+
 using namespace std;
 
 camera_fb_t *fb = nullptr;
@@ -18,7 +24,9 @@ unsigned long last_camera = 0;
 const unsigned long CAMERA_INTERVAL = 100;
 
 unsigned long last_control = 0;
-const unsigned long CONTROL_INTERVAL = 20;
+const unsigned long CONTROL_INTERVAL = 50;
+
+bool rebootFlag = false;
 
 void setup()
 {
@@ -34,7 +42,9 @@ void setup()
 
     ws_server_init();
 
-    ina219_setup();
+    // ina219_setup();
+
+    initMotor();
 
     Serial.println("Setup finished.");
 }
@@ -81,8 +91,61 @@ void loop()
 
         controlData = control();
 
-        Serial.printf("x: %.2f, y: %.2f, z: %.2f\n", controlData[0], controlData[1], controlData[2]);
+        fs90r("left", controlData[0]);
+        fs90r("right", controlData[1]);
+
+        sg90(controlData[2]);
 
         last_control = now;
     }
+
+    if (Connected == 0)
+    {
+        memset(lastMsg, 0, sizeof(lastMsg));
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////
+
+bool ina_219_status = false;
+
+void init()
+{
+    Serial.begin(115200);
+    Wire.begin(16, 13);
+
+    init_camera();
+    wifi_init_sta();
+    OTA_setup();
+    ws_server_init();
+    ina_219_status = ina219_setup();
+    initMotor();
+
+    Serial.println("Setup finished.");
+}
+
+SemaphoreHandle_t rebootSem;
+void reboot_task(void *pvParameters)
+{
+    while (1)
+    {
+        if (xSemaphoreTake(rebootSem, portMAX_DELAY) == pdTRUE)
+        {
+            Serial.println("System reboot by front");
+
+            webSocket.disconnect();
+            vTaskDelay(pdMS_TO_TICKS(50));
+            esp_restart();
+        }
+    }
+}
+
+// app_main
+void do_main()
+{
+    init();
+
+    rebootSem = xSemaphoreCreateBinary();
+    xSemaphoreGive(rebootSem);
+    xTaskCreate(reboot_task, "reboot_task", 1024, NULL, 5, NULL);
 }

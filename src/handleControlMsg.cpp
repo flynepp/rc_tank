@@ -8,15 +8,15 @@
 #include <vector>
 using namespace std;
 
-#define SG90_PIN 4
-#define FS90R1_PIN 2
-#define FS90R2_PIN 14
+#define SG90_PIN 16
+#define FS90R1_PIN 12
+#define FS90R2_PIN 13
 
 const int freq = 50;
-const int resolution = 16;
+const int resolution = 10;
 
 int deg = 90;
-float rotateDeg = 30.0;
+float rotateDeg = 90.0;
 
 bool rebootFlag = false;
 
@@ -34,7 +34,7 @@ pair<float, float> transfer(float x, float y)
         v /= len;
     }
 
-    return make_pair(u, v);
+    return make_pair(u * 1.414, v * 1.414);
 }
 
 vector<float> control()
@@ -111,14 +111,18 @@ void fs90r(string which, float speed)
 
     int PWM = int(1500.0 + direction * speed * 300.0);
 
+    char buf[50];
+    sprintf(buf, "LedcWrite: channel %d, PWM %d, Duty %d. ", channel, PWM, pulseWidthToDuty(PWM));
+    Serial.print(buf);
+
     ledcWrite(channel, pulseWidthToDuty(PWM));
 }
 
-void sg90(float speed)
+void sg90(float rad)
 {
     int channel = 0;
 
-    int destination = deg + int(speed * rotateDeg);
+    int destination = deg + int(rad * rotateDeg);
 
     destination = destination < 0 ? 0 : destination;
     destination = destination > 180 ? 180 : destination;
@@ -126,6 +130,11 @@ void sg90(float speed)
     // 500 ~ 1500 ~ 2500
     // 0 ~ 90 ~ 180
     int PWM = 500 + 2000 / 180 * destination;
+
+    char buf[50];
+    sprintf(buf, "LedcWrite: channel %d, PWM %d, Duty %d.", channel, PWM, pulseWidthToDuty(PWM));
+    Serial.print(buf);
+    Serial.println();
 
     ledcWrite(channel, pulseWidthToDuty(PWM));
 }
