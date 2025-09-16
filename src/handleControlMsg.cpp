@@ -13,7 +13,7 @@ using namespace std;
 #define FS90R2_PIN 13
 
 const int freq = 50;
-const int resolution = 10;
+const int resolution = 12;
 
 int deg = 90;
 float rotateDeg = 90.0;
@@ -22,19 +22,20 @@ bool rebootFlag = false;
 
 pair<float, float> transfer(float x, float y)
 {
-    // 差速映射
-    float u = y + x;
-    float v = y - x;
+    // Step 1: 水平翻转
+    float x_flip = -x;
+    float y_flip = y;
 
-    // 限制输出在单位圆内
-    float len = sqrt(u * u + v * v);
-    if (len > 1.0f)
-    {
-        u /= len;
-        v /= len;
-    }
+    // Step 2: 顺时针旋转 45°
+    float cos45 = sqrt(2.0f) / 2.0f;
+    float sin45 = sqrt(2.0f) / 2.0f;
 
-    return make_pair(u * 1.414, v * 1.414);
+    float u = x_flip * cos45 + y_flip * sin45;
+    float v = -x_flip * sin45 + y_flip * cos45;
+
+    // Serial.printf("x: %.2f, y: %.2f => u: %.2f, v: %.2f\n", x, y, u, v);
+
+    return make_pair(u, v);
 }
 
 vector<float> control()
@@ -114,6 +115,8 @@ void fs90r(string which, float speed)
     char buf[50];
     sprintf(buf, "LedcWrite: channel %d, PWM %d, Duty %d. ", channel, PWM, pulseWidthToDuty(PWM));
     Serial.print(buf);
+    Serial.print(which.c_str());
+    Serial.println();
 
     ledcWrite(channel, pulseWidthToDuty(PWM));
 }
@@ -131,10 +134,10 @@ void sg90(float rad)
     // 0 ~ 90 ~ 180
     int PWM = 500 + 2000 / 180 * destination;
 
-    char buf[50];
-    sprintf(buf, "LedcWrite: channel %d, PWM %d, Duty %d.", channel, PWM, pulseWidthToDuty(PWM));
-    Serial.print(buf);
-    Serial.println();
+    // char buf[50];
+    // sprintf(buf, "LedcWrite: channel %d, PWM %d, Duty %d.", channel, PWM, pulseWidthToDuty(PWM));
+    // Serial.print(buf);
+    // Serial.println();
 
     ledcWrite(channel, pulseWidthToDuty(PWM));
 }
